@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+env/
+venv/
+
+# Environment files with sensitive local credentials
+.env
+*.local
+
+# IDE & Editor artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test outputs & logs
+*.log

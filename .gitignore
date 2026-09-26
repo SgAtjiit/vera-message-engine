@@ -1,0 +1,62 @@
+# =============================================================================
+# Git Ignore Configuration
+# =============================================================================
+
+# 1. Environment variables & sensitive credentials (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+credentials.json
+secrets.json
+token.json
+id_rsa*
+*.local
+
+# 2. Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 3. Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# 4. Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 5. IDE & OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# 6. Test outputs & logs
+results/
+*.log
