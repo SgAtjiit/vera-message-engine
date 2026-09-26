@@ -269,10 +269,16 @@ def try_llm_reply(
     Attempt an LLM completion using OpenAI or Anthropic SDK if configured with temperature=0.
     Times out in timeout_seconds (default 6s, well below the 30s budget) and returns None on any failure.
     """
+    # Deterministic fast path is prioritized for sub-50ms execution and zero hallucination.
+    # LLM reply generation is enabled only when explicitly opted in.
+    if os.getenv("USE_LLM_REPLY", "false").lower() not in ("true", "1"):
+        return None
+
     openai_key = os.getenv("OPENAI_API_KEY")
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    groq_key = os.getenv("GROQ_API_KEY") or os.getenv("LLM_API_KEY")
 
-    if not openai_key and not anthropic_key:
+    if not openai_key and not anthropic_key and not groq_key:
         return None
 
     system_prompt = (
@@ -294,7 +300,30 @@ def try_llm_reply(
     })
 
     try:
-        if openai_key:
+        if groq_key:
+            from openai import OpenAI
+            client = OpenAI(
+                api_key=groq_key,
+                base_url="https://api.groq.com/openai/v1",
+                timeout=timeout_seconds,
+            )
+            model_name = os.getenv("LLM_MODEL") or "openai/gpt-oss-120b"
+            completion = client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.0,
+                response_format={"type": "json_object"},
+            )
+            raw = completion.choices[0].message.content
+            if raw:
+                data = json.loads(raw)
+                if data.get("action") in ("send", "wait", "end") and "rationale" in data:
+                    return data
+
+        elif openai_key:
             from openai import OpenAI
             client = OpenAI(api_key=openai_key, timeout=timeout_seconds)
             completion = client.chat.completions.create(
